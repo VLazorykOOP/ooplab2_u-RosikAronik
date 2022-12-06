@@ -1,0 +1,237 @@
+#include <bitset>
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+
+using namespace std;
+#include "Tasks.h"
+#include "Examples.h"
+void MenuTask()
+{
+    cout << "     Menu Task   \n";
+    cout << "    1.  Calculation of expressions using bitwise operations  \n";
+    cout << "    2.  Data encryption using bitwise operations \n";
+    cout << "    3.  Data encryption using structures with bit fields \n";
+    cout << "    4.  The problem of using bitwise operations \n";
+    cout << "    5.  Examples of problems using bitwise operations \n";
+    cout << "    6.  Exit \n";
+}
+void converter(char out[],int in) {
+	int i, ix, n = 0;
+	double x;
+
+	auto st = cin.rdstate();
+
+	if (st != cin.goodbit) {
+		cin.clear();
+		cout << " error \n";
+		cin.get();
+		cin.get();
+		return;
+	}
+
+	if (in != 0) {
+		x = in;
+		do {
+			x = x / 2.;
+			ix = (int)x;
+
+			if ((x - ix) != 0) out[n] = '1';
+			else out[n] = '0';
+
+			n++;
+			x = ix;
+		} while (x >= 1);
+	}
+
+	cout << " Rezult:";
+
+	for (i = n - 1; i >= 0; i--)cout << out[i];
+	
+	cout << endl;
+	cin.get();
+
+	return;
+}
+
+
+
+void task1() {
+	
+	char Snamb[17];
+	char & Sn = Snamb[0];
+	int N;
+	cout << " Enter a positive integer:";
+	cin >> N;
+	converter(Snamb, N);
+	
+	int a, b, c, d, x, y;
+	cout << "An example of calculating an expression using only bitwise operations.\n";
+	cout << "Expression : x = (15 * a + 312*b)/64 - c*120 + d*121 \n";
+	cout << " Input a  b  c  d : ";
+
+	cin >> a >> b >> c >> d;
+	auto st = cin.rdstate();
+	if (st != cin.goodbit) { cin.clear(); cout << " error \n"; cin.get(); cin.get(); return; }
+
+	x = (((a<<7-a)+(c<<5))>>12)-((d<<10)+(d<<7)+(d<<5)+(d<<4))+((b<<7)+(b<<1)+b);
+	
+	y = (15 * a + 312*b)/64 - c*120 + d*121;
+	
+	cout << "  x=" << x << "  y=" << y << " a=" << a << "  b=" << b <<"  c="<< c <<"  d="<< d << endl;
+	cin.get();
+	cin.get();
+	return;
+
+}
+
+void task2()
+{ 
+	ifstream Iniput ("input.txt");
+	if (!Iniput.is_open())cout << "error "<<endl;
+	ofstream hol;
+	hol.open("output.txt", ios::binary);
+	if (!hol.is_open())cout << "error 1 "<<endl;
+	char InS[10];
+	unsigned short OutCoding[8]{};
+	unsigned char c;
+	unsigned short  t, i, ind0, b, mol, starsh;
+	short j;
+
+	for (int ind0 = 0; ind0 < 8; ind0++) {
+
+		Iniput.getline(InS,9);
+
+		for (int index = 0;index < 8;index++) {
+			cout << InS[index];
+			if (InS[index] == NULL)InS[index] = ' ';
+		}
+
+		cout << endl;
+
+		for (i = 0; i < 8; i++)           //
+		{
+			unsigned short r;
+			r = 0;
+			cout << r<<" start " << endl;// 0000 0000 0000 0000
+			c = InS[i];                   // s -0x73 = 0111 0011
+			t = c;						  // 0000 0000 0111 0011
+			mol = t & 0x00F0;            // 0000 0000 0111 0000
+			starsh = t & 0x000F;		  // 0000 0000 0000 0011
+			r |= ind0 << 13;
+			cout << r << " namb string " << endl;
+			r |= mol << 5;
+			cout << r << " smoll part " << endl;// 0000 0000 0000 0111
+			t = 1;						  // 0000 0000 0000 0001
+			t |= t << 8;
+			b = 0;
+			for (j = 0; j < 8; j++)       // обчислення біта парності
+			{
+				if (r & t) {
+					if (b == 0) b = 1;
+					else b = 0;
+				}
+				t <<= 1;
+			}
+			r |= b << 8;
+			cout << r << " first bit " << endl;
+			r |= starsh << 4;
+			cout << r << " big part " << endl;
+			r |= i << 1; // 0000 0000 0000 1010  if i=5 -> 0000 0000 0000 0101
+			cout << r << " position " << endl;
+			t = 1;
+			b = 0;
+			for (j = 0; j < 8; j++)         // обчислення біта парності
+			{
+				if (r & t) {
+					if (b == 0) b = 1; else b = 0;
+				}
+				t <<= 1;
+			}
+			r |= b;                    // 0011 0000 0101 0111 if i=5 0000 0000 0000 0101
+			OutCoding[i] = r;
+			hol << r;
+			cout << r << " end ";
+		}
+		cout << endl;
+		cout<< OutCoding << "\n";
+		hol <<"\n";
+		
+
+	}
+	Iniput.close();
+	hol.close();
+}
+
+void task3(){
+unsigned char pbit(unsigned char c){
+	unsigned char t = 1, b = 0;
+	for (int j = 0; j < 16; j++)         // ���������� ��� �������
+	{
+		if (c & t) {
+			if (b == 0) b = 1; else b = 0;
+		}
+		t <<= 1;
+	}
+	return b;
+}
+    struct TextCode1 {
+	unsigned short numberPosRow : 3;  //����� ����� �������
+	unsigned short molodshaChastyna : 4;  // ������� �������
+	unsigned short bitpSecondTwoFields : 1;  // �� ������� ������ ���� ����
+	unsigned short starshaChastyna : 4;   // ������ �������
+	unsigned short posRow : 3;				// ������� ������� � �����
+	unsigned short bitpLastTwoFields : 1;	// �� ���������� ���� ����
+};
+
+//void Example333(){}
+	char a[8][8];
+	TextCode1 res[8][8] = { 0 };
+	cin.ignore(8, '\n');
+	cout << "enter 8 lines of text of 8 characters each(or less)" << endl;
+	for (int i = 0; i < 8; i++){
+		cin.getline(a[i], 9);
+	}
+	for (int i = 0; i < 8; i++) {
+		if (strlen(a[i]) < 8) {
+			for (int c = strlen(a[i]); c < 8; c++) {
+				a[i][c] = ' ';
+			}
+			a[i][7] = '\0';
+		}
+	}
+	for (int i = 0; i < 8; i++) {
+		cout << a[i] << ";" << endl;
+	}
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			res[i][j].numberPosRow = i;
+			res[i][j].molodshaChastyna = (a[i][j] << 12) >> 12;
+
+			res[i][j].bitpSecondTwoFields = pbit(res[i][j].numberPosRow) ^ pbit(res[i][j].molodshaChastyna);
+
+			res[i][j].starshaChastyna = a[i][j] >> 4;
+			res[i][j].posRow = j;
+
+			res[i][j].bitpLastTwoFields = pbit(res[i][j].starshaChastyna) ^ pbit(res[i][j].posRow);
+			cout << "coded symbol '" << a[i][j] << "' in pos [" << i << "][" << j
+				<< "]:" << endl;
+			cout << "line number of the character : " << bitset<3>(res[i][j].numberPosRow) << endl;
+			cout << "molodsha chartyna ASCII code symbol: " << bitset<4>(res[i][j].molodshaChastyna) << endl;
+			cout << "the parity bit of the first two fields: " << bitset<1>(res[i][j].bitpSecondTwoFields) << endl;
+			cout << "starsha chartyna ASCII code symbol: " << bitset<4>(res[i][j].starshaChastyna) << endl;
+			cout << "the position of the character in the string : " << bitset<3>(res[i][j].posRow) << endl;
+			cout << "the parity bit of the previous two fields : " << bitset<1>(res[i][j].bitpLastTwoFields) << endl << endl;
+		}
+	}
+}
+
+
+
+void task4()
+{   // Задача із використання побітових операцій
+    // The problem of using bitwise operations
+    cout << " Data encryption using structures with bit fields \n";
+
+}
